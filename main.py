@@ -1,13 +1,21 @@
 import json
+import os
+import csv
+
+def export_to_csv(expenses):
+    if not expenses:
+        
+
+FILE_NAME = "expense.json"
+def load_expenses():
+    if os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "r") as file:
+            return json.load(file)
+    return []
+
 def save_expenses(expenses):
     with open("expenses.json", "w") as file:
-        json.dump(expenses, file)
-def load_expenses():
-    try:
-        with open("expenses.json", "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return []
+        json.dump(expenses, file, indent = 4)
 
 def add_expense(expenses):
     print("\n--- Adding expenses---")
@@ -41,46 +49,32 @@ def view_expense(expenses):
         print("No expenses Found!")
         return
     
-    for index, expense in enumerate(expenses, start=1):
-        print(f"\n Expense {index}")
-        print(f"Date       :{expense['date']}")
-        print(f"Category   :{expense['category']}")
-        print(f"Amount     :${expense['amount']}")
-        print(f"Note       :{expense['note']}")
+    for i, expense in enumerate(expenses, start=1):
+        print(f"{i}. {expense['date']} | {expense['category']} | ${expense['amount']} | {expense['note']}")
 
-def summary_expense(expenses):
-    print("\n____Expense Summary____")      
+def total_expense(expenses):
+    total = sum(expense['amount'] for expense in expenses)
+    print(f"Total Expenses {total}")        
 
-    if not expenses:
-        print("No expenses to summerize ") 
-        return
+def category_summary(expenses):
+    summary = {}
 
-    total = 0
-    category_total = {}
+    for exp in expenses:
+        category = exp["category"]
+        summary[category] = summary.get(category, 0) + exp["amount"]
 
-    for expense in expenses:
-        amount = expense['amount']
-        category = expense['category']
-        total += amount
-
-        if category in category_total:
-            category_total[category] += amount
-        else:
-            category_total[category] = amount
-    print(f"\n Total expense ${total}")   
-
-    print("\nCategory-wise Summary") 
-    for category, amount in category_total.items():
-        print(f"{category} : ${amount}")
-        
-    
+    print("\n Category-wise Summary")
+    for cat, amt in summary.items():
+        print(f"{cat}: ₹{amt}")
+  
 expenses = load_expenses()
 while True:
     print("\n----Personal Expense Tracker----")
     print("\n1. Add Expense: ")
     print("2. View Expense: ")
-    print("3. Exit")
-    print("4. Expense Summary: ")
+    print("3. Total Expense: ")
+    print("4. Category Summary: ")
+    print("5. Exit")
 
     choice = input("Enter your choice: ")
 
@@ -89,9 +83,11 @@ while True:
     elif choice == '2':
         view_expense(expenses)
     elif choice == '3':
-        print("Exit")
-        break
+        total_expense(expenses)
     elif choice == "4":
-        summary_expense(expenses)
+        category_summary(expenses)
+    elif choice == "5":
+        print("GoodBye, Have A Nice Day !")
+        break
     else:
-        print("Invalid choice, try agian !!!")
+        print("Invalid choice, try again")
